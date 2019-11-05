@@ -2,11 +2,18 @@ package jp.sobue.spring.security.preauth;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.session.config.annotation.web.http.EnableSpringHttpSession;
 
+/**
+ * 起動クラス.
+ *
+ * @author ssobue
+ */
 @SpringBootApplication
 public class SpringPreAuthSessionApplication {
 
+  /**
+   * 起動メソッド.
+   */
   public static void main(String[] args) {
     SpringApplication.run(SpringPreAuthSessionApplication.class, args);
   }
