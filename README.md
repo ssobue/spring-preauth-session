@@ -1,0 +1,1 @@
+PreAuthenticatedの検証コード
