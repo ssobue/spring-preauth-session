@@ -1,0 +1,25 @@
+# spring
+spring:
+  application:
+    name: spring-preauth-session
+  profiles:
+    active: default
+  main:
+    banner-mode: off
+  # jdbc
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: 'jdbc:h2:mem:'
+    username: sa
+    password: ''
+  # spring session
+  session:
+    jdbc:
+      initialize-schema: embedded
+
+# logging
+logging:
+  level:
+    root: info
+    org.apache: warn
+    org.springframework.boot.web.embedded.tomcat: warn

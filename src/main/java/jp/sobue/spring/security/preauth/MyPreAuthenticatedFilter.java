@@ -1,8 +1,8 @@
 package jp.sobue.spring.security.preauth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
@@ -22,8 +22,9 @@ public class MyPreAuthenticatedFilter extends AbstractPreAuthenticatedProcessing
    * Principalが変わったことにして、UserDetailServiceを強制コールさせる.
    */
   @Override
-  protected boolean principalChanged(HttpServletRequest request,
-      Authentication currentAuthentication) {
+  protected boolean principalChanged(
+      final HttpServletRequest request,
+      final Authentication currentAuthentication) {
     if (IGNORE_LIST.parallelStream().anyMatch(suffix -> request.getRequestURI().endsWith(suffix))) {
       return super.principalChanged(request, currentAuthentication);
     }

@@ -1,6 +1,6 @@
 package jp.sobue.spring.security.preauth;
 
-import java.util.Collections;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
 import org.springframework.security.core.userdetails.User;
@@ -23,10 +23,10 @@ public class MyUserDetailsService implements
    */
   @Override
   public UserDetails loadUserDetails(PreAuthenticatedAuthenticationToken token) {
-    UserDetails userDetails = new User(
+    var userDetails = new User(
         token.getPrincipal().toString(), // Principal
         token.getCredentials().toString(), // Password
-        Collections.emptySet() // EmptySet
+        Set.of() // Empty-Set
     );
 
     log.info("user detail service called.");

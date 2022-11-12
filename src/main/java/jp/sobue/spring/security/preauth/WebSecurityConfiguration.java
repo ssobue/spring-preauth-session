@@ -3,10 +3,8 @@ package jp.sobue.spring.security.preauth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
 
@@ -17,57 +15,47 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
  */
 @RequiredArgsConstructor
 @Configuration
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfiguration {
 
-  /**
-   * ユーザ情報を取得するための実装.
-   */
-  private final MyUserDetailsService userDetailsService;
-
-  /**
-   * PreAuthenticated認証用のProviderのBean.
-   */
   @Bean
-  public PreAuthenticatedAuthenticationProvider preAuthenticatedAuthenticationProvider() {
-    PreAuthenticatedAuthenticationProvider provider = new PreAuthenticatedAuthenticationProvider();
-    provider.setPreAuthenticatedUserDetailsService(userDetailsService);
-    return provider;
-  }
-
-  /**
-   * AuthenticationProviderの設定.
-   */
-  @Override
-  protected void configure(AuthenticationManagerBuilder auth) {
-    auth.authenticationProvider(preAuthenticatedAuthenticationProvider());
-  }
-
-  /**
-   * Ignoreの設定.
-   */
-  @Override
-  public void configure(WebSecurity webSecurity) {
-    webSecurity.ignoring().mvcMatchers("/");
-  }
-
-  /**
-   * セキュリティ設定.
-   */
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
-    http.addFilter(preAuthenticatedProcessingFilter());
-    http.authorizeRequests().anyRequest().fullyAuthenticated();
+  public SecurityFilterChain securityFilterChain(
+      final HttpSecurity http,
+      final MyUserDetailsService userDetailsService) throws Exception {
+    return http
+        .addFilter(preAuthenticatedProcessingFilter(userDetailsService))
+        .authorizeHttpRequests()
+        // Ignoreの設定.
+        .requestMatchers("", "/").permitAll()
+        // セキュリティ設定.
+        .requestMatchers("/auth", "/logout").authenticated()
+        .and().build();
   }
 
   /**
    * PreAuthenticated認証用のFilter.
    */
-  private AbstractPreAuthenticatedProcessingFilter preAuthenticatedProcessingFilter()
-      throws Exception {
-    MyPreAuthenticatedFilter filter = new MyPreAuthenticatedFilter();
+  private AbstractPreAuthenticatedProcessingFilter preAuthenticatedProcessingFilter(
+      final MyUserDetailsService userDetailsService
+  ) {
+    // AuthenticationProviderの設定.
+    var filter = new MyPreAuthenticatedFilter();
+    var authProvider = preAuthenticatedAuthenticationProvider(userDetailsService);
     filter.setCheckForPrincipalChanges(true);
-    filter.setAuthenticationManager(authenticationManager());
-
+    filter.setAuthenticationManager(authProvider::authenticate);
     return filter;
+  }
+
+  /**
+   * PreAuthenticated認証用のProviderのBean.
+   *
+   * @param userDetailsService ユーザ情報を取得するための実装.
+   */
+  @Bean
+  public PreAuthenticatedAuthenticationProvider preAuthenticatedAuthenticationProvider(
+      final MyUserDetailsService userDetailsService
+  ) {
+    var provider = new PreAuthenticatedAuthenticationProvider();
+    provider.setPreAuthenticatedUserDetailsService(userDetailsService);
+    return provider;
   }
 }
